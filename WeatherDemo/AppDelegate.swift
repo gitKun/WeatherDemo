@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        appearanceSetting()
         return true
     }
 
@@ -42,3 +43,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+private extension AppDelegate {
+
+    func appearanceSetting() {
+        //UIScrollView.appearance().contentInsetAdjustmentBehavior = .never
+        // 导航栏
+        do {
+            let titleAttr: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.white, .font: UIFont.systemFont(ofSize: 18, weight: .medium)]
+            let app = UINavigationBarAppearance.init()
+            //app.configureWithTransparentBackground()  // 重置背景和阴影颜色
+            app.titleTextAttributes = titleAttr
+            app.backgroundColor = UIColor.black  // 设置导航栏背景色
+            //app.backgroundImage = UIImage.getImage(color: UIColor.white, size: CGSize(width: 1, height: 1))
+            app.shadowImage = UIImage.init()  // 设置导航栏下边界分割线透明
+            UINavigationBar.appearance().scrollEdgeAppearance = app  // 带scroll滑动的页面
+            UINavigationBar.appearance().standardAppearance = app // 常规页面
+        }
+
+        // FIXED: - tableView 解决 iOS15 部分情况下 tableView sectionHeaderTopPadding 设置成 0 也不起作用的 BUG
+        UITableView.appearance().tableHeaderView = UIView.init(frame: CGRect(x: 0, y: 0, width: 0, height: CGFloat.leastNormalMagnitude))
+
+        if #available(iOS 15.0, *) {
+            UITableView.appearance().sectionHeaderTopPadding = 0
+            UITableView.appearance().isPrefetchingEnabled = false
+        }
+    }
+}

@@ -18,18 +18,18 @@ import Foundation
 // MARK: - Wapper
 struct WeatherResponseModel: Codable {
     let status, count, info, infocode: String
-    let forecasts: [Forecast]?
-    let lives: [Life]?
+    let forecasts: [WeatherForecastModel]?
+    let lives: [WeatherLifeModel]?
 }
 
-// MARK: - Forecast
-struct Forecast: Codable {
+// MARK: - WeatherForecastModel
+struct WeatherForecastModel: Codable {
     let city, adcode, province, reporttime: String
-    let casts: [Cast]
+    let casts: [ForecastCastModel]
 }
 
-// MARK: - Cast
-struct Cast: Codable {
+// MARK: - ForecastCastModel
+struct ForecastCastModel: Codable {
     let date, week, dayweather, nightweather: String
     let daytemp, nighttemp, daywind, nightwind: String
     let daypower, nightpower, daytempFloat, nighttempFloat: String
@@ -41,8 +41,8 @@ struct Cast: Codable {
     }
 }
 
-// MARK: - Life
-struct Life: Codable {
+// MARK: - WeatherLife
+struct WeatherLifeModel: Codable {
     let province, city, adcode, weather: String
     let temperature, winddirection, windpower, humidity: String
     let reporttime, temperatureFloat, humidityFloat: String
@@ -51,5 +51,18 @@ struct Life: Codable {
         case province, city, adcode, weather, temperature, winddirection, windpower, humidity, reporttime
         case temperatureFloat = "temperature_float"
         case humidityFloat = "humidity_float"
+    }
+}
+
+extension WeatherLifeModel {
+
+    var moreInfoText: String {
+        "湿度" + humidity + "%  " + winddirection + "风" + windpower + "级"
+    }
+
+    var reportHourTime: String {
+        let startIdx = reporttime.index(reporttime.startIndex, offsetBy: 11)
+        let endIdx = reporttime.index(reporttime.startIndex, offsetBy: 16)
+        return String(reporttime[startIdx..<endIdx]) + "发布"
     }
 }
