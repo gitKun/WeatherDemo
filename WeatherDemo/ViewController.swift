@@ -22,6 +22,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
 
         let provider = MoyaProvider<WeathercNetworkService>()
+        //provider.requestPublisher(.baseInfo(.beijing))
         provider.request(.baseInfo(.beijing)) { result in
             switch result {
             case .success(let response):

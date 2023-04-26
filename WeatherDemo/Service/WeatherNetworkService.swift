@@ -15,6 +15,9 @@
 
 import Foundation
 import Moya
+import Combine
+
+private let kProvider = MoyaProvider<WeathercNetworkService>()
 
 /// 命名空间
 fileprivate enum ServiceInfo {
@@ -66,6 +69,10 @@ enum WeathercNetworkService {
     case baseInfo(CityAdCode)
     /// 返回预报天气
     case allInfo(CityAdCode)
+
+    func request() -> AnyPublisher<Response, MoyaError> {
+        kProvider.requestPublisher(self)
+    }
 }
 
 extension WeathercNetworkService: TargetType {

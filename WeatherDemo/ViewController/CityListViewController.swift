@@ -45,9 +45,12 @@ extension CityListViewController {
 
 // MARK: - 绑定 viewModel
 
+let vm = CityListViewModel()
+
 extension CityListViewController {
 
     func bindViewModel() {
+        vm.viewDidLoad()
     }
 }
 
@@ -77,12 +80,17 @@ extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
 
+        let detailVC = WeatherDetilViewController()
+        detailVC.modalPresentationStyle = .fullScreen
+        detailVC.setupLifeInfo(.init(province: "北京", city: "北京市", adcode: "110000", weather: "晴", temperature: "14", winddirection: "西南", windpower: "4", humidity: "19", reporttime: "2023-04-26 09:08:57", temperatureFloat: "14.0", humidityFloat: "19.0"))
+        // TODO: - 转场动画
+        navigationController?.present(detailVC, animated: true)
     }
 }
 
 // MARK: - 布局UI元素
 
-extension CityListViewController {
+private extension CityListViewController {
 
     func configureHierarchy() {
         view.backgroundColor = .black

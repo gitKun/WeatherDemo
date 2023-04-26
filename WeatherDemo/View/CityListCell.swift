@@ -81,7 +81,7 @@ private extension CityListCell {
 
     func configureBgView() {
         bgView = UIView(frame: .zero)
-        bgView.backgroundColor = .systemTeal
+        bgView.backgroundColor = .rgba(r: 46, g: 110, b: 194)
         bgView.roundCorners(.allCorners, radius: 10)
         bgView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(bgView)
