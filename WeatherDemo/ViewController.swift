@@ -14,12 +14,23 @@
 */
 
 import UIKit
+import Moya
 
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+
+        let provider = MoyaProvider<WeathercNetworkService>()
+        provider.request(.baseInfo(.beijing)) { result in
+            switch result {
+            case .success(let response):
+                print(response)
+            case .failure(let error):
+                print(error)
+            }
+        }
+        
     }
 
 
