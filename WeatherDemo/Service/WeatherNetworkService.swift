@@ -54,21 +54,24 @@ enum CityAdCode: String, CaseIterable {
             return "沈阳"
         }
     }
+}
+
+fileprivate extension String {
 
     var toBaseInfoParam: [String: Any] {
-        return ["key": ServiceInfo.kWeatherKey, "city": rawValue, "extensions": "base", "output": "JSON"]
+        return ["key": ServiceInfo.kWeatherKey, "city": self, "extensions": "base", "output": "JSON"]
     }
 
     var toAllInfoParam: [String: Any] {
-        return ["key": ServiceInfo.kWeatherKey, "city": rawValue, "extensions": "all", "output": "JSON"]
+        return ["key": ServiceInfo.kWeatherKey, "city": self, "extensions": "all", "output": "JSON"]
     }
 }
 
 enum WeathercNetworkService {
     /// 返回实况天气
-    case baseInfo(CityAdCode)
+    case baseInfo(String)
     /// 返回预报天气
-    case allInfo(CityAdCode)
+    case allInfo(String)
 
     func request() -> AnyPublisher<Response, MoyaError> {
         kProvider.requestPublisher(self)

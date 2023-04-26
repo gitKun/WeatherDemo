@@ -20,6 +20,7 @@ class WeatherDetilViewController: UIViewController {
 // MARK: - 属性
 
     private var lifeModel: WeatherLifeModel!
+    private var castModel: WeatherForecastModel!
 
 // MARK: - 生命周期 & override
 
@@ -41,8 +42,9 @@ class WeatherDetilViewController: UIViewController {
 
 extension WeatherDetilViewController {
 
-    func setupLifeInfo(_ info: WeatherLifeModel) {
-        lifeModel = info
+    func setupInfo(with lifeModel: WeatherLifeModel, castModel: WeatherForecastModel) {
+        self.lifeModel = lifeModel
+        self.castModel = castModel
     }
 
     @objc func listButtonCilcked(_ button: UIButton) {

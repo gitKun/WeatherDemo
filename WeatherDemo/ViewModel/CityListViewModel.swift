@@ -20,11 +20,14 @@ import Moya
 protocol CityListViewModelInputs {
     func viewDidLoad()
     func viewWillAppear()
+
+    func showDetailVC(with model: WeatherLifeModel)
 }
 
 protocol CityListViewModelOutputs {
 
     var allCityWeatherLifeInfo: AnyPublisher<[WeatherLifeModel], Never> { get }
+    var cityWeatherDetailInfo: AnyPublisher<(WeatherLifeModel, WeatherForecastModel), Never> { get }
 }
 
 protocol CityListViewModelType {
@@ -35,6 +38,7 @@ protocol CityListViewModelType {
 final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, CityListViewModelOutputs {
 
     private let queryDataSubject: PassthroughSubject<Void, Never> = PassthroughSubject()
+    private let queryDetailInfoSubject: PassthroughSubject<WeatherLifeModel, Never> = PassthroughSubject()
     private var lastQueryTime: TimeInterval = 0
 
     init() {}
@@ -62,10 +66,14 @@ final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, C
         }
     }
 
+    func showDetailVC(with model: WeatherLifeModel) {
+        queryDetailInfoSubject.send(model)
+    }
+
 // MARK: - Output
 
     private lazy var allLifePulisher: AnyPublisher<[WeatherLifeModel], Never> = {
-        let subject = queryDataSubject
+        let subject = self.queryDataSubject
             .flatMap { _ -> AnyPublisher<[WeatherLifeModel], Never> in
                 CityAdCode.allCityLifeModelPublisher()
             }
@@ -77,7 +85,41 @@ final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, C
     var allCityWeatherLifeInfo: AnyPublisher<[WeatherLifeModel], Never> {
         return self.allLifePulisher
     }
+
+    var cityWeatherDetailInfo: AnyPublisher<(WeatherLifeModel, WeatherForecastModel), Never> {
+        self.createQueryDetailPublisher().receive(on: RunLoop.main).eraseToAnyPublisher()
+    }
 }
+
+
+private extension CityListViewModel {
+
+    func createQueryDetailPublisher() -> AnyPublisher<(WeatherLifeModel, WeatherForecastModel), Never> {
+        queryDetailInfoSubject.flatMap { lifeModel -> AnyPublisher<(WeatherLifeModel, WeatherForecastModel), Never> in
+            WeathercNetworkService.allInfo(lifeModel.adcode)
+                .request()
+                .map(WeatherResponseModel.self)
+                .map { Result<WeatherResponseModel, Error>.success($0) }
+                .catch { Just(.failure($0)) }
+                .map { response -> WeatherForecastModel? in
+                    switch response {
+                    case .success(let model):
+                        return model.forecasts?.first
+                    case .failure(_):
+                        return nil
+                    }
+                }
+                .compactMap { $0 }
+                .map { forecastModel -> (WeatherLifeModel, WeatherForecastModel) in
+                    return (lifeModel, forecastModel)
+                }
+                .eraseToAnyPublisher()
+        }.eraseToAnyPublisher()
+    
+    }
+}
+
+
 
 fileprivate extension CityAdCode {
 
@@ -96,7 +138,7 @@ fileprivate extension CityAdCode {
     }
 
     private var lifeModelPublisher: AnyPublisher<WeatherLifeModel, Never> {
-        WeathercNetworkService.baseInfo(self)
+        WeathercNetworkService.baseInfo(self.rawValue)
             .request()
             .map(WeatherResponseModel.self)
             .map { Result<WeatherResponseModel, Error>.success($0) }

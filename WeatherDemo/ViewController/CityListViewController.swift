@@ -53,6 +53,14 @@ extension CityListViewController {
     func eventListen() {
         viewModel.input.viewDidLoad()
     }
+
+    private func showDetailVC(with lifeModel: WeatherLifeModel, castModel: WeatherForecastModel) {
+        let detailVC = WeatherDetilViewController()
+        detailVC.modalPresentationStyle = .fullScreen
+        detailVC.setupInfo(with: lifeModel, castModel: castModel)
+        // TODO: - 转场动画
+        navigationController?.present(detailVC, animated: true)
+    }
 }
 
 // MARK: - 绑定 viewModel
@@ -63,6 +71,10 @@ extension CityListViewController {
         viewModel.output.allCityWeatherLifeInfo.sink { [weak self] values in
             self?.dataSource = values
             self?.tableView.reloadData()
+        }.store(in: &cancellable)
+
+        viewModel.output.cityWeatherDetailInfo.sink { [weak self] (lifeModel, forecastModel) in
+            self?.showDetailVC(with: lifeModel, castModel: forecastModel)
         }.store(in: &cancellable)
     }
 }
@@ -94,12 +106,7 @@ extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: false)
 
         guard indexPath.row < dataSource.count else { return }
-
-        let detailVC = WeatherDetilViewController()
-        detailVC.modalPresentationStyle = .fullScreen
-        detailVC.setupLifeInfo(dataSource[indexPath.row])
-        // TODO: - 转场动画
-        navigationController?.present(detailVC, animated: true)
+        viewModel.input.showDetailVC(with: dataSource[indexPath.row])
     }
 }
 
