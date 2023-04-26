@@ -25,7 +25,13 @@ class ViewController: UIViewController {
         provider.request(.baseInfo(.beijing)) { result in
             switch result {
             case .success(let response):
-                print(response)
+                let data = response.data
+                do {
+                    let model = try JSONDecoder().decode(WeatherResponseModel.self, from: data)
+                    print(model.info)
+                } catch let error {
+                    print(error)
+                }
             case .failure(let error):
                 print(error)
             }
