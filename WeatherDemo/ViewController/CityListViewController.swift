@@ -14,11 +14,16 @@
 */
 
 import UIKit
+import Combine
 
 class CityListViewController: UIViewController {
 
 // MARK: - 属性
 
+    private let viewModel: CityListViewModelType = CityListViewModel()
+    private var cancellable: Set<AnyCancellable> = []
+
+    private var dataSource: [WeatherLifeModel] = []
 
 // MARK: - 生命周期 & override
 
@@ -26,8 +31,14 @@ class CityListViewController: UIViewController {
         super.viewDidLoad()
 
         configureHierarchy()
-        eventListen()
         bindViewModel()
+        eventListen()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        viewModel.input.viewWillAppear()
     }
 
 // MARK: - UI element
@@ -40,17 +51,19 @@ class CityListViewController: UIViewController {
 extension CityListViewController {
 
     func eventListen() {
+        viewModel.input.viewDidLoad()
     }
 }
 
 // MARK: - 绑定 viewModel
 
-let vm = CityListViewModel()
-
 extension CityListViewController {
 
     func bindViewModel() {
-        vm.viewDidLoad()
+        viewModel.output.allCityWeatherLifeInfo.sink { [weak self] values in
+            self?.dataSource = values
+            self?.tableView.reloadData()
+        }.store(in: &cancellable)
     }
 }
 
@@ -59,7 +72,7 @@ extension CityListViewController {
 extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 6
+        dataSource.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -68,8 +81,8 @@ extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if let cityCell = cell as? CityListCell {
-            cityCell.updateData(with: .init(province: "北京", city: "北京市", adcode: "110000", weather: "晴", temperature: "14", winddirection: "西南", windpower: "4", humidity: "19", reporttime: "2023-04-26 09:08:57", temperatureFloat: "14.0", humidityFloat: "19.0"))
+        if let cityCell = cell as? CityListCell, indexPath.row < dataSource.count {
+            cityCell.updateData(with: dataSource[indexPath.row])
         }
     }
 
@@ -80,9 +93,11 @@ extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
 
+        guard indexPath.row < dataSource.count else { return }
+
         let detailVC = WeatherDetilViewController()
         detailVC.modalPresentationStyle = .fullScreen
-        detailVC.setupLifeInfo(.init(province: "北京", city: "北京市", adcode: "110000", weather: "晴", temperature: "14", winddirection: "西南", windpower: "4", humidity: "19", reporttime: "2023-04-26 09:08:57", temperatureFloat: "14.0", humidityFloat: "19.0"))
+        detailVC.setupLifeInfo(dataSource[indexPath.row])
         // TODO: - 转场动画
         navigationController?.present(detailVC, animated: true)
     }

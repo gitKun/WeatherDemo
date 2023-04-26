@@ -24,7 +24,7 @@ protocol CityListViewModelInputs {
 
 protocol CityListViewModelOutputs {
 
-    var allBaseWeatherInfo: AnyPublisher<[String], Never> { get }
+    var allCityWeatherLifeInfo: AnyPublisher<[WeatherLifeModel], Never> { get }
 }
 
 protocol CityListViewModelType {
@@ -32,67 +32,56 @@ protocol CityListViewModelType {
     var output: CityListViewModelOutputs { get }
 }
 
-private let request1: PassthroughSubject<Void, Never> = PassthroughSubject()
+final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, CityListViewModelOutputs {
 
-final class CityListViewModel/*: CityListViewModelType, CityListViewModelInputs, CityListViewModelOutputs*/ {
+    private let queryDataSubject: PassthroughSubject<Void, Never> = PassthroughSubject()
+    private var lastQueryTime: TimeInterval = 0
 
-//    var input: CityListViewModelInputs { self }
-//    var output: CityListViewModelOutputs { self }
+    init() {}
 
-    var cancellable: Set<AnyCancellable> = []
+// MARK: - ViewModelType
 
-    init() {
-
-    }
+    var input: CityListViewModelInputs { self }
+    var output: CityListViewModelOutputs { self }
 
 // MARK: - Input
 
     func viewDidLoad() {
-        // 第一次启动 拉取全部数据全部
-        
-        let ss = request1.flatMap { _ -> AnyPublisher<[WeatherLifeModel], Never> in
-            CityAdCode.allCityLifeModelPublisher()
-        }
-            .receive(on: RunLoop.main)
-            .eraseToAnyPublisher()
-
-        ss.sink { value in
-            print(value.count)
-        }.store(in: &cancellable)
-
-        request1.send(())
+        // 第一次启动 拉取全部数据全部, 记录拉取数据的时间点
+        queryDataSubject.send(())
+        lastQueryTime = Date().timeIntervalSince1970
     }
 
     func viewWillAppear() {
-        // 和本地保存的时间戳作比较, 超过三分钟则拉取数据
+        let currentTime = Date().timeIntervalSince1970
+
+        // 数据超过3分钟,再次请求
+        if lastQueryTime + 1800 < currentTime {
+            lastQueryTime = currentTime
+            queryDataSubject.send(())
+        }
     }
 
 // MARK: - Output
 
-    
+    private lazy var allLifePulisher: AnyPublisher<[WeatherLifeModel], Never> = {
+        let subject = queryDataSubject
+            .flatMap { _ -> AnyPublisher<[WeatherLifeModel], Never> in
+                CityAdCode.allCityLifeModelPublisher()
+            }
+            .receive(on: RunLoop.main)
+            .eraseToAnyPublisher()
+        return subject
+    }()
+
+    var allCityWeatherLifeInfo: AnyPublisher<[WeatherLifeModel], Never> {
+        return self.allLifePulisher
+    }
 }
 
 fileprivate extension CityAdCode {
 
     static func allCityLifeModelPublisher() -> AnyPublisher<[WeatherLifeModel], Never> {
-        /*
-        let beijing = CityAdCode.beijing.lifeModelPublisher
-        let shanghai = CityAdCode.shanghai.lifeModelPublisher
-        let guangzhou = CityAdCode.guangzhou.lifeModelPublisher
-        let shenzhen = CityAdCode.shenzhen.lifeModelPublisher
-        let suzhou = CityAdCode.suzhou.lifeModelPublisher
-        let shenyang = CityAdCode.shenyang.lifeModelPublisher
-        let array = [guangzhou, shenzhen, suzhou, shenyang]
-        var zipValue = Publishers.Zip(beijing, shanghai).map { return [$0, $1]}.eraseToAnyPublisher()
-        zipValue = array.reduce(zipValue) { partialResult, pub in
-            return partialResult.zip(pub) { array, model in
-                var reult = array
-                reult.append(model)
-                return reult
-            }.eraseToAnyPublisher()
-        }
-        */
-
         let allPulisher = CityAdCode.allCases.map { $0.lifeModelPublisher }
         var zipValue = Publishers.Zip(allPulisher[0], allPulisher[1]).map { return [$0, $1]}.eraseToAnyPublisher()
         zipValue = allPulisher.dropFirst(2).reduce(zipValue) { partialResult, pub in
@@ -106,7 +95,7 @@ fileprivate extension CityAdCode {
         return zipValue
     }
 
-   private var lifeModelPublisher: AnyPublisher<WeatherLifeModel, Never> {
+    private var lifeModelPublisher: AnyPublisher<WeatherLifeModel, Never> {
         WeathercNetworkService.baseInfo(self)
             .request()
             .map(WeatherResponseModel.self)
@@ -123,19 +112,4 @@ fileprivate extension CityAdCode {
             .compactMap { $0 }
             .eraseToAnyPublisher()
     }
-
-    /*
-   static func generateAllBaseInfoPublisher() -> [AnyPublisher<Result<WeatherResponseModel, Error>, Never>] {
-        let result = CityAdCode.allCases.map { code -> AnyPublisher<Result<WeatherResponseModel, Error>, Never> in
-            WeathercNetworkService.baseInfo(code)
-                .request()
-                .map(WeatherResponseModel.self)
-                .map { Result<WeatherResponseModel, Error>.success($0) }
-                .catch { Just(.failure($0)) }
-                .eraseToAnyPublisher()
-        }
-
-        return result
-    }
-     */
 }
