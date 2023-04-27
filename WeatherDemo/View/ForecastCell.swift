@@ -33,16 +33,18 @@ class ForecastCell: UITableViewCell {
 
     private var weekLabel: UILabel!
     private var weatherLabel: UILabel!
+    private var windInfoLabel: UILabel!
     private var tempLabel: UILabel!
     private var splitLine: UIView!
 }
 
 extension ForecastCell {
 
-    func testShow() {
-        weekLabel.text = "今天"
-        weatherLabel.text = "晴" + "转" + "多云"
-        tempLabel.text = "11°" + "到" + "23°"
+    func updateUI(with model: ForecastCastModel) {
+        weekLabel.text = model.weekDayByCN
+        weatherLabel.text = model.weatherInfo
+        tempLabel.text = "\(model.nighttemp)°到\(model.daytemp)°"
+        windInfoLabel.text = model.windInfoText
     }
 }
 
@@ -54,6 +56,7 @@ private extension ForecastCell {
 
         configureSplitLine()
         configureWeekLabbel()
+        configureWindInfoLabel()
         configureWeatherLabel()
         configureTempLabel()
     }
@@ -74,7 +77,7 @@ private extension ForecastCell {
     func configureWeekLabbel() {
         weekLabel = UILabel(frame: .zero)
         weekLabel.textColor = .white
-        weekLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        weekLabel.font = .systemFont(ofSize: 24, weight: .semibold)
         weekLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(weekLabel)
         NSLayoutConstraint.activate([
@@ -87,13 +90,24 @@ private extension ForecastCell {
     func configureWeatherLabel() {
         weatherLabel = UILabel(frame: .zero)
         weatherLabel.textColor = .white
-        weatherLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        weatherLabel.font = .systemFont(ofSize: 16, weight: .regular)
         weatherLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(weatherLabel)
         NSLayoutConstraint.activate([
             weatherLabel.leadingAnchor.constraint(equalTo: weekLabel.trailingAnchor, constant: 16),
-            weatherLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            //weatherLabel.widthAnchor.constraint(equalToConstant: 60)
+            weatherLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8)
+        ])
+    }
+
+    func configureWindInfoLabel() {
+        windInfoLabel = UILabel(frame: .zero)
+        windInfoLabel.textColor = .white
+        windInfoLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        windInfoLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(windInfoLabel)
+        NSLayoutConstraint.activate([
+            windInfoLabel.leadingAnchor.constraint(equalTo: weekLabel.trailingAnchor, constant: 16),
+            windInfoLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
         ])
     }
 
@@ -101,7 +115,7 @@ private extension ForecastCell {
         tempLabel = UILabel(frame: .zero)
         tempLabel.textColor = .white
         tempLabel.textAlignment = .right
-        tempLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        tempLabel.font = .systemFont(ofSize: 16, weight: .regular)
         tempLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(tempLabel)
         NSLayoutConstraint.activate([

@@ -66,3 +66,47 @@ extension WeatherLifeModel {
         return String(reporttime[startIdx..<endIdx]) + "发布"
     }
 }
+
+extension ForecastCastModel {
+    var windInfoText: String {
+        if nightwind == daywind, nightpower == daypower {
+            return nightwind + "风" + nightpower + "级"
+        }
+        if nightwind == daywind {
+            return nightwind + "风" + daypower + "到" + nightpower + "级"
+        }
+        if nightpower == daypower {
+            return daywind + "转" + nightwind + "风" + daypower + "级"
+        }
+        return daywind + "转" + nightwind + "风" + daypower + "到" + nightpower + "级"
+    }
+
+    var weekDayByCN: String {
+        switch self.week {
+        case "1":
+            return "周一"
+        case "2":
+            return "周二"
+        case "3":
+            return "周三"
+        case "4":
+            return "周四"
+        case "5":
+            return "周五"
+        case "6":
+            return "周六"
+        case "7":
+            return "周日"
+        default:
+            return week
+        }
+    }
+
+    var weatherInfo: String {
+        if dayweather == nightweather {
+            return dayweather
+        }
+
+        return dayweather + "转" + nightweather
+    }
+}

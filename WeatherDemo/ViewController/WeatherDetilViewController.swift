@@ -15,12 +15,15 @@
 
 import UIKit
 
+
 class WeatherDetilViewController: UIViewController {
 
 // MARK: - 属性
 
     private var lifeModel: WeatherLifeModel!
     private var castModel: WeatherForecastModel!
+
+    private var dataSource: [SectionType] = []
 
 // MARK: - 生命周期 & override
 
@@ -45,6 +48,14 @@ extension WeatherDetilViewController {
     func setupInfo(with lifeModel: WeatherLifeModel, castModel: WeatherForecastModel) {
         self.lifeModel = lifeModel
         self.castModel = castModel
+
+        let castList = castModel.casts
+        guard !castList.isEmpty else { return }
+
+        var castCellTypes = castList.map { ForecastCellType.forecastInfo($0) }
+        castCellTypes.insert(.forecastTitle, at: 0)
+
+        self.dataSource.append(.forecastSection(castCellTypes))
     }
 
     @objc func listButtonCilcked(_ button: UIButton) {
@@ -57,26 +68,55 @@ extension WeatherDetilViewController {
 extension WeatherDetilViewController: UITableViewDataSource, UITableViewDelegate {
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+        dataSource.count
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        let sectionType = dataSource[section]
+        switch sectionType {
+        case .forecastSection(let list):
+            return list.count
+        }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: ForecastCell.reuseID, for: indexPath)
-        return cell
+        let sectionType = dataSource[indexPath.section]
+        switch sectionType {
+        case .forecastSection(let list):
+            let cellType = list[indexPath.row]
+            let cell = tableView.dequeueReusableCell(withIdentifier: cellType.reuseID, for: indexPath)
+            return cell
+        }
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if let forecastCell = cell as? ForecastCell {
-            forecastCell.testShow()
+        let sectionType = dataSource[indexPath.section]
+        switch sectionType {
+        case .forecastSection(let list):
+            let cellType = list[indexPath.row]
+            switch cellType {
+            case .forecastTitle:
+                break
+            case .forecastInfo(let castModel):
+                if let castCell = cell as? ForecastCell {
+                    castCell.updateUI(with: castModel)
+                }
+            }
         }
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 44
+        let sectionType = dataSource[indexPath.section]
+        switch sectionType {
+        case .forecastSection(let list):
+            let cellType = list[indexPath.row]
+            switch cellType {
+            case .forecastTitle:
+                return 34.0
+            case .forecastInfo(_):
+                return 60.0
+            }
+        }
     }
 }
 
@@ -96,7 +136,7 @@ private extension WeatherDetilViewController {
 
     func configureHeaderView() {
         headerView = UIView(frame: .zero)
-        headerView.backgroundColor = .red
+        headerView.backgroundColor = .clear
         headerView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(headerView)
         let heightCons = headerView.heightAnchor.constraint(equalToConstant: 0)
@@ -108,10 +148,10 @@ private extension WeatherDetilViewController {
         ])
 
         if let info = lifeModel {
-            heightCons.constant = 65
+            heightCons.constant = 90
             let cityLabel = UILabel(frame: .zero)
             cityLabel.textColor = .white
-            cityLabel.font = .systemFont(ofSize: 22, weight: .semibold)
+            cityLabel.font = .systemFont(ofSize: 34, weight: .semibold)
             cityLabel.text = info.city
             cityLabel.translatesAutoresizingMaskIntoConstraints = false
             headerView.addSubview(cityLabel)
@@ -122,7 +162,7 @@ private extension WeatherDetilViewController {
     
             let infoLabel = UILabel(frame: .zero)
             infoLabel.textColor = .white
-            infoLabel.font = .systemFont(ofSize: 16, weight: .semibold)
+            infoLabel.font = .systemFont(ofSize: 20, weight: .semibold)
             infoLabel.text = info.temperature + "° | " + info.weather
             infoLabel.translatesAutoresizingMaskIntoConstraints = false
             headerView.addSubview(infoLabel)
@@ -181,9 +221,29 @@ private extension WeatherDetilViewController {
             tableView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
         ])
 
-        tableView.register(ForecastHeaderView.self, forHeaderFooterViewReuseIdentifier: ForecastHeaderView.reuseID)
+        tableView.register(ForecastTitleCell.self, forCellReuseIdentifier: ForecastTitleCell.reuseID)
         tableView.register(ForecastCell.self, forCellReuseIdentifier: ForecastCell.reuseID)
         tableView.delegate = self
         tableView.dataSource = self
+    }
+}
+
+fileprivate typealias RangeString = (from: String, to: String)
+
+private enum SectionType {
+    case forecastSection([ForecastCellType])
+}
+
+private enum ForecastCellType {
+    case forecastTitle
+    case forecastInfo(ForecastCastModel)
+
+    var reuseID: String {
+        switch self {
+        case .forecastTitle:
+            return ForecastTitleCell.reuseID
+        case .forecastInfo(_):
+            return ForecastCell.reuseID
+        }
     }
 }
