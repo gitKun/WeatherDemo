@@ -37,7 +37,7 @@ protocol CityListViewModelType {
 
 final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, CityListViewModelOutputs {
 
-    private let queryDataSubject: PassthroughSubject<Void, Never> = PassthroughSubject()
+    private let queryDataSubject: ObservableObjectPublisher = ObservableObjectPublisher()
     private let queryDetailInfoSubject: PassthroughSubject<WeatherLifeModel, Never> = PassthroughSubject()
     private var lastQueryTime: TimeInterval = 0
 
@@ -52,7 +52,7 @@ final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, C
 
     func viewDidLoad() {
         // 第一次启动 拉取全部数据全部, 记录拉取数据的时间点
-        queryDataSubject.send(())
+        queryDataSubject.send()
         lastQueryTime = Date().timeIntervalSince1970
     }
 
@@ -62,7 +62,7 @@ final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, C
         // 数据超过3分钟,再次请求
         if lastQueryTime + 1800 < currentTime {
             lastQueryTime = currentTime
-            queryDataSubject.send(())
+            queryDataSubject.send()
         }
     }
 
