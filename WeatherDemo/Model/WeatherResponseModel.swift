@@ -42,7 +42,7 @@ struct ForecastCastModel: Codable {
 }
 
 // MARK: - WeatherLife
-struct WeatherLifeModel: Codable {
+struct WeatherLifeModel: Codable, Hashable {
     let province, city, adcode, weather: String
     let temperature, winddirection, windpower, humidity: String
     let reporttime, temperatureFloat, humidityFloat: String
@@ -51,6 +51,10 @@ struct WeatherLifeModel: Codable {
         case province, city, adcode, weather, temperature, winddirection, windpower, humidity, reporttime
         case temperatureFloat = "temperature_float"
         case humidityFloat = "humidity_float"
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(adcode)
     }
 }
 
