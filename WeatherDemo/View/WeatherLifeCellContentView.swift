@@ -92,7 +92,7 @@ private extension WeatherLifeCellContentView {
         addSubview(bgView)
         NSLayoutConstraint.activate([
             bgView.heightAnchor.constraint(equalToConstant: 111),
-            bgView.topAnchor.constraint(equalTo: topAnchor, constant: 10),
+            bgView.topAnchor.constraint(equalTo: topAnchor, constant: 0),
             bgView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
             bgView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0),
             bgView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 0)

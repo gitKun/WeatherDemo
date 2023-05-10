@@ -23,8 +23,6 @@ class CityListViewController: UIViewController {
     private let viewModel: CityListViewModelType = CityListViewModel()
     private var cancellable: Set<AnyCancellable> = []
 
-    private var dataSource: [WeatherLifeModel] = []
-
     private var collectionDataSource: UICollectionViewDiffableDataSource<Section, WeatherLifeModel>!
     private var snapshot: NSDiffableDataSourceSnapshot<Section, WeatherLifeModel>!
 
@@ -46,15 +44,13 @@ class CityListViewController: UIViewController {
 
 // MARK: - UI element
 
-    private var tableView: UITableView!
-
     private var collectionView: UICollectionView!
 }
 
 extension CityListViewController {
 
-    enum Section {
-        case lifeList
+    enum Section: Hashable {
+        case lifeList(String)
     }
 }
 
@@ -80,20 +76,15 @@ extension CityListViewController {
 extension CityListViewController {
 
     func bindViewModel() {
-#if false
-        viewModel.output.allCityWeatherLifeInfo.sink { [weak self] values in
-            self?.dataSource = values
-            self?.tableView.reloadData()
-        }.store(in: &cancellable)
-
-        viewModel.output.cityWeatherDetailInfo.sink { [weak self] (lifeModel, forecastModel) in
-            self?.showDetailVC(with: lifeModel, castModel: forecastModel)
-        }.store(in: &cancellable)
-#endif
         viewModel.output.allCityWeatherLifeInfo.sink { [weak self] values in
             var snp = NSDiffableDataSourceSnapshot<Section, WeatherLifeModel>()
-            snp.appendSections([.lifeList])
-            snp.appendItems(values, toSection: .lifeList)
+//            snp.appendSections([.lifeList])
+//            snp.appendItems(values, toSection: .lifeList)
+            values.forEach { model in
+                let section = Section.lifeList(model.adcode)
+                snp.appendSections([section])
+                snp.appendItems([model], toSection: section)
+            }
             self?.snapshot = snp
             self?.collectionDataSource.apply(snp, animatingDifferences: true)
         }.store(in: &cancellable)
@@ -102,37 +93,6 @@ extension CityListViewController {
             self?.showDetailVC(with: lifeModel, castModel: forecastModel)
         }.store(in: &cancellable)
         
-    }
-}
-
-// MARK: - UITableViewDataSource & UITableViewDelegate
-
-extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        dataSource.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: CityListCell.reuseID, for: indexPath)
-        return cell
-    }
-
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if let cityCell = cell as? CityListCell, indexPath.row < dataSource.count {
-            cityCell.updateData(with: dataSource[indexPath.row])
-        }
-    }
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 120
-    }
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: false)
-
-        guard indexPath.row < dataSource.count else { return }
-        viewModel.input.showDetailVC(with: dataSource[indexPath.row])
     }
 }
 
@@ -148,11 +108,30 @@ private extension CityListViewController {
     }
 
     func configureCollectionView() {
+        /*
+        var separatorConfig = UIListSeparatorConfiguration(listAppearance: .insetGrouped)
+        separatorConfig.topSeparatorInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 100, trailing: 0)
+        layoutConfig.showsSeparators = true
+        layoutConfig.separatorConfiguration = separatorConfig
+        */
+        /*
         var layoutConfig = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
-        layoutConfig.backgroundColor = .black
+        layoutConfig.backgroundColor = .systemCyan
         let listLayout = UICollectionViewCompositionalLayout.list(using: layoutConfig)
+        */
 
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: listLayout)
+        // 使用 sectionLayout 解决内部布局空隙过大的问题
+        let compositionalConfig = UICollectionViewCompositionalLayoutConfiguration()
+        compositionalConfig.interSectionSpacing = 0
+        let compositionalLayout = UICollectionViewCompositionalLayout(sectionProvider: { section, environment in
+            var layoutConfig = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+            layoutConfig.backgroundColor = .black // .systemCyan // 打开注释查看界面
+            let sectionLayout = NSCollectionLayoutSection.list(using: layoutConfig, layoutEnvironment: environment)
+            sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+            return sectionLayout
+        }, configuration: compositionalConfig)
+
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: compositionalLayout)
         collectionView.backgroundColor = .black
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -169,18 +148,5 @@ private extension CityListViewController {
 
 //        snapshot = NSDiffableDataSourceSnapshot<Section, WeatherLifeModel>()
 //        collectionDataSource.apply(snapshot, animatingDifferences: false)
-    }
-
-    func configureTableView() {
-        tableView = UITableView(frame: view.bounds, style: .plain)
-        tableView.backgroundColor = .black
-        tableView.separatorStyle = .none
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.addSubview(tableView)
-
-        tableView.register(CityListCell.self, forCellReuseIdentifier: CityListCell.reuseID)
-        tableView.delegate = self
-        tableView.dataSource = self
     }
 }
