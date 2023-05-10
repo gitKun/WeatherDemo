@@ -108,17 +108,6 @@ private extension CityListViewController {
     }
 
     func configureCollectionView() {
-        /*
-        var separatorConfig = UIListSeparatorConfiguration(listAppearance: .insetGrouped)
-        separatorConfig.topSeparatorInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 100, trailing: 0)
-        layoutConfig.showsSeparators = true
-        layoutConfig.separatorConfiguration = separatorConfig
-        */
-        /*
-        var layoutConfig = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
-        layoutConfig.backgroundColor = .systemCyan
-        let listLayout = UICollectionViewCompositionalLayout.list(using: layoutConfig)
-        */
 
         // 使用 sectionLayout 解决内部布局空隙过大的问题
         let compositionalConfig = UICollectionViewCompositionalLayoutConfiguration()
@@ -145,8 +134,5 @@ private extension CityListViewController {
             let cell = collectionV.dequeueConfiguredReusableCell(using: lifeCellRegistion, for: indexPath, item: itemIdentifier)
             return cell
         })
-
-//        snapshot = NSDiffableDataSourceSnapshot<Section, WeatherLifeModel>()
-//        collectionDataSource.apply(snapshot, animatingDifferences: false)
     }
 }
