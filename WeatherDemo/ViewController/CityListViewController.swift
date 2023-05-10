@@ -45,6 +45,10 @@ class CityListViewController: UIViewController {
 // MARK: - UI element
 
     private var collectionView: UICollectionView!
+
+    private lazy var coordinator: PushCoordinator = {
+        PushCoordinator(viewController: self)
+    }()
 }
 
 extension CityListViewController {
@@ -61,14 +65,6 @@ extension CityListViewController {
     func eventListen() {
         viewModel.input.viewDidLoad()
     }
-
-    private func showDetailVC(with lifeModel: WeatherLifeModel, castModel: WeatherForecastModel) {
-        let detailVC = WeatherDetilViewController()
-        detailVC.modalPresentationStyle = .fullScreen
-        detailVC.setupInfo(with: lifeModel, castModel: castModel)
-        // TODO: - 转场动画
-        navigationController?.present(detailVC, animated: true)
-    }
 }
 
 // MARK: - 绑定 viewModel
@@ -78,8 +74,6 @@ extension CityListViewController {
     func bindViewModel() {
         viewModel.output.allCityWeatherLifeInfo.sink { [weak self] values in
             var snp = NSDiffableDataSourceSnapshot<Section, WeatherLifeModel>()
-//            snp.appendSections([.lifeList])
-//            snp.appendItems(values, toSection: .lifeList)
             values.forEach { model in
                 let section = Section.lifeList(model.adcode)
                 snp.appendSections([section])
@@ -90,9 +84,20 @@ extension CityListViewController {
         }.store(in: &cancellable)
 
         viewModel.output.cityWeatherDetailInfo.sink { [weak self] (lifeModel, forecastModel) in
-            self?.showDetailVC(with: lifeModel, castModel: forecastModel)
+            self?.coordinator.presentDetailVC(with: lifeModel, forecastModel: forecastModel)
         }.store(in: &cancellable)
-        
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension CityListViewController: UICollectionViewDelegate {
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: false)
+
+        guard let selectedItem = collectionDataSource.itemIdentifier(for: indexPath) else { return }
+        viewModel.input.showDetailVC(with: selectedItem)
     }
 }
 
@@ -126,6 +131,7 @@ private extension CityListViewController {
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(collectionView)
 
+        collectionView.delegate = self
         let lifeCellRegistion = UICollectionView.CellRegistration<WeatherLifeCell, WeatherLifeModel> { (cell, indexPath, itemIdentifier) in
             cell.lifeModel = itemIdentifier
         }

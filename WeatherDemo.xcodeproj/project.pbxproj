@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1A9A1CB7CD0D0590DB2F94CB /* Pods_WeatherDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD9BE2A64CC31A4787222255 /* Pods_WeatherDemo.framework */; };
 		BC0539742A0A82C800960A7F /* TestAssociatedtypeSimeName.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0539722A0A44D300960A7F /* TestAssociatedtypeSimeName.swift */; };
+		BC0539762A0B83F300960A7F /* CustomLayoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0539752A0B83F200960A7F /* CustomLayoutViewController.swift */; };
+		BC0539792A0B84D800960A7F /* PushCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0539782A0B84D800960A7F /* PushCoordinator.swift */; };
 		BC1BBA8E29F8A0FA00231B79 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1BBA8D29F8A0FA00231B79 /* AppDelegate.swift */; };
 		BC1BBA9029F8A0FA00231B79 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1BBA8F29F8A0FA00231B79 /* SceneDelegate.swift */; };
 		BC1BBA9229F8A0FA00231B79 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1BBA9129F8A0FA00231B79 /* ViewController.swift */; };
@@ -34,6 +36,8 @@
 		6635DDE09C8AA2C52E50CC4C /* Pods-WeatherDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeatherDemo.debug.xcconfig"; path = "Target Support Files/Pods-WeatherDemo/Pods-WeatherDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		AA46713AB46759BE3E6A56A5 /* Pods-WeatherDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeatherDemo.release.xcconfig"; path = "Target Support Files/Pods-WeatherDemo/Pods-WeatherDemo.release.xcconfig"; sourceTree = "<group>"; };
 		BC0539722A0A44D300960A7F /* TestAssociatedtypeSimeName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAssociatedtypeSimeName.swift; sourceTree = "<group>"; };
+		BC0539752A0B83F200960A7F /* CustomLayoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomLayoutViewController.swift; sourceTree = "<group>"; };
+		BC0539782A0B84D800960A7F /* PushCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushCoordinator.swift; sourceTree = "<group>"; };
 		BC1BBA8A29F8A0FA00231B79 /* WeatherDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC1BBA8D29F8A0FA00231B79 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BC1BBA8F29F8A0FA00231B79 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -87,6 +91,14 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		BC0539772A0B846A00960A7F /* Coordiantor */ = {
+			isa = PBXGroup;
+			children = (
+				BC0539782A0B84D800960A7F /* PushCoordinator.swift */,
+			);
+			path = Coordiantor;
+			sourceTree = "<group>";
+		};
 		BC1BBA8129F8A0FA00231B79 = {
 			isa = PBXGroup;
 			children = (
@@ -112,6 +124,7 @@
 				BC1BBA8F29F8A0FA00231B79 /* SceneDelegate.swift */,
 				BC1BBAA729F8AF6500231B79 /* Tools */,
 				BC1BBAA629F8AF4E00231B79 /* Service */,
+				BC0539772A0B846A00960A7F /* Coordiantor */,
 				BC1BBAA929F8AFB400231B79 /* ViewController */,
 				BC1BBAA829F8AF9500231B79 /* View */,
 				BC1BBAA529F8AF3D00231B79 /* ViewModel */,
@@ -176,6 +189,7 @@
 			children = (
 				BC1BBAAA29F8B04000231B79 /* CityListViewController.swift */,
 				BC1BBAAC29F8B05A00231B79 /* WeatherDetilViewController.swift */,
+				BC0539752A0B83F200960A7F /* CustomLayoutViewController.swift */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -305,6 +319,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC1BBA9229F8A0FA00231B79 /* ViewController.swift in Sources */,
+				BC0539792A0B84D800960A7F /* PushCoordinator.swift in Sources */,
 				BC1BBAB629F8BF8C00231B79 /* WeatherResponseModel.swift in Sources */,
 				BCD3DC192A03ABB2009A1B67 /* WeatherLifeCellContentView.swift in Sources */,
 				BC1BBAC029F9F6B300231B79 /* ForecastTitleCell.swift in Sources */,
@@ -312,6 +327,7 @@
 				BC1BBAB129F8B12F00231B79 /* CityListViewModel.swift in Sources */,
 				BC1BBABC29F9198000231B79 /* ForecastCell.swift in Sources */,
 				BCD3DC152A03AB36009A1B67 /* WeatherLifeCellContentConfiguration.swift in Sources */,
+				BC0539762A0B83F300960A7F /* CustomLayoutViewController.swift in Sources */,
 				BCD3DC172A03AB4C009A1B67 /* WeatherLifeCell.swift in Sources */,
 				BC1BBA8E29F8A0FA00231B79 /* AppDelegate.swift in Sources */,
 				BC1BBAB829F8C8A600231B79 /* UIColor_Prelude.swift in Sources */,
