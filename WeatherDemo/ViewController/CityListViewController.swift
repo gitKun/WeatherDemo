@@ -25,6 +25,9 @@ class CityListViewController: UIViewController {
 
     private var dataSource: [WeatherLifeModel] = []
 
+    private var collectionDataSource: UICollectionViewDiffableDataSource<Section, WeatherLifeModel>!
+    private var snapshot: NSDiffableDataSourceSnapshot<Section, WeatherLifeModel>!
+
 // MARK: - 生命周期 & override
 
     override func viewDidLoad() {
@@ -44,6 +47,15 @@ class CityListViewController: UIViewController {
 // MARK: - UI element
 
     private var tableView: UITableView!
+
+    private var collectionView: UICollectionView!
+}
+
+extension CityListViewController {
+
+    enum Section {
+        case lifeList
+    }
 }
 
 // MARK: - 事件处理
@@ -68,6 +80,7 @@ extension CityListViewController {
 extension CityListViewController {
 
     func bindViewModel() {
+#if false
         viewModel.output.allCityWeatherLifeInfo.sink { [weak self] values in
             self?.dataSource = values
             self?.tableView.reloadData()
@@ -76,6 +89,19 @@ extension CityListViewController {
         viewModel.output.cityWeatherDetailInfo.sink { [weak self] (lifeModel, forecastModel) in
             self?.showDetailVC(with: lifeModel, castModel: forecastModel)
         }.store(in: &cancellable)
+#endif
+        viewModel.output.allCityWeatherLifeInfo.sink { [weak self] values in
+            var snp = NSDiffableDataSourceSnapshot<Section, WeatherLifeModel>()
+            snp.appendSections([.lifeList])
+            snp.appendItems(values, toSection: .lifeList)
+            self?.snapshot = snp
+            self?.collectionDataSource.apply(snp, animatingDifferences: true)
+        }.store(in: &cancellable)
+
+        viewModel.output.cityWeatherDetailInfo.sink { [weak self] (lifeModel, forecastModel) in
+            self?.showDetailVC(with: lifeModel, castModel: forecastModel)
+        }.store(in: &cancellable)
+        
     }
 }
 
@@ -118,6 +144,34 @@ private extension CityListViewController {
         view.backgroundColor = .black
         navigationItem.title = "天气"
 
+        configureCollectionView()
+    }
+
+    func configureCollectionView() {
+        var layoutConfig = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+        layoutConfig.backgroundColor = .black
+        let listLayout = UICollectionViewCompositionalLayout.list(using: layoutConfig)
+
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: listLayout)
+        collectionView.backgroundColor = .black
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(collectionView)
+
+        let lifeCellRegistion = UICollectionView.CellRegistration<WeatherLifeCell, WeatherLifeModel> { (cell, indexPath, itemIdentifier) in
+            cell.lifeModel = itemIdentifier
+        }
+
+        collectionDataSource = UICollectionViewDiffableDataSource<Section, WeatherLifeModel>(collectionView: collectionView, cellProvider: { (collectionV, indexPath, itemIdentifier) -> UICollectionViewCell? in
+            let cell = collectionV.dequeueConfiguredReusableCell(using: lifeCellRegistion, for: indexPath, item: itemIdentifier)
+            return cell
+        })
+
+//        snapshot = NSDiffableDataSourceSnapshot<Section, WeatherLifeModel>()
+//        collectionDataSource.apply(snapshot, animatingDifferences: false)
+    }
+
+    func configureTableView() {
         tableView = UITableView(frame: view.bounds, style: .plain)
         tableView.backgroundColor = .black
         tableView.separatorStyle = .none

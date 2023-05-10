@@ -51,7 +51,22 @@ class WeatherLifeCellContentView: UIView, UIContentView {
 
     /// 负责设置内容视图的值 currentConfiguration 并将所有 currentConfiguration 属性应用于内容视图。
     private func apply(configuration: WeatherLifeCellContentConfiguration) {
-        
+        currentConfiguration = configuration
+
+        guard let model = configuration.model else {
+            cityNameLabel.text = ""
+            temperatureLabel.text = ""
+            reporttimeLabel.text = ""
+            weatherLabel.text = ""
+            moreInfoLabel.text = ""
+            return
+        }
+
+        cityNameLabel.text = model.city
+        temperatureLabel.text = model.temperature + "°"
+        reporttimeLabel.text = model.reportHourTime
+        weatherLabel.text = model.weather
+        moreInfoLabel.text = model.moreInfoText
     }
 }
 
@@ -78,8 +93,9 @@ private extension WeatherLifeCellContentView {
         NSLayoutConstraint.activate([
             bgView.heightAnchor.constraint(equalToConstant: 111),
             bgView.topAnchor.constraint(equalTo: topAnchor, constant: 10),
-            bgView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 5),
-            bgView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -5),
+            bgView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
+            bgView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0),
+            bgView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 0)
         ])
     }
 
