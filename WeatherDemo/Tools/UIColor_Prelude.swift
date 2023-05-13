@@ -22,4 +22,8 @@ public extension UIColor {
     @nonobjc static func rgba(r: Float, g: Float, b: Float, a: Float = 1.0) -> UIColor {
         return UIColor(red: CGFloat(r / 255.0), green: CGFloat(g / 255.0), blue: CGFloat(b / 255.0), alpha: CGFloat(a))
     }
+
+    @nonobjc static func random(alpha: CGFloat = 1.0) -> UIColor {
+        return UIColor(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1), alpha: alpha)
+    }
 }
