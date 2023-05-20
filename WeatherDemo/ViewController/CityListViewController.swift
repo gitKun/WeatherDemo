@@ -20,7 +20,7 @@ class CityListViewController: UIViewController {
 
 // MARK: - 属性
 
-    private let viewModel: CityListViewModelType = CityListViewModel()
+    private let viewModel: CityListViewModel = CityListViewModel()
     private var cancellable: Set<AnyCancellable> = []
 
     private var collectionDataSource: UICollectionViewDiffableDataSource<Section, WeatherLifeModel>!

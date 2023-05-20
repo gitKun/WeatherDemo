@@ -27,3 +27,21 @@ public extension UIColor {
         return UIColor(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1), alpha: alpha)
     }
 }
+
+
+typealias ColorRGB = (red: CGFloat, green: CGFloat, blue: CGFloat)
+
+extension UIColor {
+    
+    convenience init(_ rgb: ColorRGB, alpha: CGFloat = 1.0) {
+        self.init(red: rgb.red / 255.0, green: rgb.green / 255.0, blue: rgb.blue / 255.0, alpha: alpha)
+    }
+    
+    func getRGB() -> ColorRGB {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        getRed(&red, green: &green, blue: &blue, alpha: nil)
+        return (red * 255, green * 255, blue * 255)
+    }
+}

@@ -17,9 +17,67 @@ import Foundation
 
 // MARK: - Wapper
 struct WeatherResponseModel: Codable {
+
     let status, count, info, infocode: String
-    let forecasts: [WeatherForecastModel]?
-    let lives: [WeatherLifeModel]?
+    let infoType: WeatherInfoType
+//    let forecasts: [WeatherForecastModel]?
+//    let lives: [WeatherLifeModel]?
+
+    enum CodingKeys: String, CodingKey {
+        case status, count, info, infocode
+        case forecasts, lives
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.status = try container.decode(String.self, forKey: .status)
+        self.count = try container.decode(String.self, forKey: .count)
+        self.info = try container.decode(String.self, forKey: .info)
+        self.infocode = try container.decode(String.self, forKey: .infocode)
+        if let forecasts = try? container.decode([WeatherForecastModel].self, forKey: .forecasts) {
+            self.infoType = .forecasts(forecasts)
+        } else if let lives = try? container.decode([WeatherLifeModel].self, forKey: .lives) {
+            self.infoType = .lives(lives)
+        } else {
+            fatalError("解析错误 ____#!")
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(status, forKey: .status)
+        try container.encode(count, forKey: .count)
+        try container.encode(info, forKey: .info)
+        try container.encode(infocode, forKey: .infocode)
+        switch infoType {
+        case .forecasts(let forecasts):
+            try container.encode(forecasts, forKey: .forecasts)
+        case .lives(let lives):
+            try container.encode(lives, forKey: .lives)
+        }
+    }
+
+    var forecasts: [WeatherForecastModel]? {
+        if case .forecasts(let values) = infoType {
+            return values
+        }
+        return nil
+    }
+
+    var lives: [WeatherLifeModel]? {
+        if case .lives(let values) = infoType {
+            return values
+        }
+        return nil
+    }
+}
+
+
+
+
+enum WeatherInfoType: Codable {
+    case forecasts([WeatherForecastModel])
+    case lives([WeatherLifeModel])
 }
 
 // MARK: - WeatherForecastModel

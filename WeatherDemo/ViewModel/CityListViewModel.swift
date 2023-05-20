@@ -16,7 +16,6 @@
 import Foundation
 import Combine
 
-
 protocol CityListViewModelInputs {
     func viewDidLoad()
     func viewWillAppear()
@@ -35,7 +34,14 @@ protocol CityListViewModelType {
     var output: CityListViewModelOutputs { get }
 }
 
-final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, CityListViewModelOutputs {
+struct CityListViewModel: CityListViewModelType {
+    private let vm: InsetViewModel = .init()
+
+    var input: CityListViewModelInputs { vm }
+    var output: CityListViewModelOutputs { vm }
+}
+
+final private class InsetViewModel: CityListViewModelInputs, CityListViewModelOutputs {
 
     private let queryDataSubject: ObservableObjectPublisher = ObservableObjectPublisher()
     private let queryDetailInfoSubject: PassthroughSubject<WeatherLifeModel, Never> = PassthroughSubject()
@@ -45,8 +51,8 @@ final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, C
 
 // MARK: - ViewModelType
 
-    var input: CityListViewModelInputs { self }
-    var output: CityListViewModelOutputs { self }
+//    var input: CityListViewModelInputs { self }
+//    var output: CityListViewModelOutputs { self }
 
 // MARK: - Input
 
@@ -92,7 +98,7 @@ final class CityListViewModel: CityListViewModelType, CityListViewModelInputs, C
 }
 
 
-private extension CityListViewModel {
+private extension InsetViewModel {
 
     func createQueryDetailPublisher() -> AnyPublisher<(WeatherLifeModel, WeatherForecastModel), Never> {
         queryDetailInfoSubject.flatMap { lifeModel -> AnyPublisher<(WeatherLifeModel, WeatherForecastModel), Never> in

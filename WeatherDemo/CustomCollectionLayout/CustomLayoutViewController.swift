@@ -137,7 +137,7 @@ private extension CustomLayoutViewController {
                 let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .estimated(120))
                 let leftGroup = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
                 let rightGroup = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-                let section = NSCollectionLayoutSection(group: group)
+                let section = NSCollectionLayoutSection(group: leftGroup)
                 return section
             }
         }
